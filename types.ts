@@ -150,3 +150,9 @@ export type RPConnection<T extends 'signals' | 'parameters'> = {
 export type JsonValue = boolean | number | string | null | JsonValue[] | {
 	[key: string]: JsonValue
 }
+
+export type ProjectConfig = {
+	uuid: string
+	startEndpoint: string
+	wsEndpoint: string
+}

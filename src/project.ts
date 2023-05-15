@@ -1,4 +1,4 @@
-import { Redpitaya } from '../mod.ts'
+import { ProjectConfig, Redpitaya } from '../mod.ts'
 
 /**
  * Project represent the host configuration.
@@ -8,7 +8,7 @@ import { Redpitaya } from '../mod.ts'
  * ```
  */
 export class Project {
-	static #config: Config
+	static #config: ProjectConfig
 	/**
 	 * This initializes an App from an UUID from the 🫓 pita project configuration.
 	 * It init the connection to the backend.
@@ -45,10 +45,4 @@ export class Project {
 	constructor() {
 		throw new TypeError('Static only class, "new" is not disponible')
 	}
-}
-
-export type Config = {
-	uuid: string
-	startEndpoint: string
-	wsEndpoint: string
 }
