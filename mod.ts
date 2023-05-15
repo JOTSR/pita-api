@@ -28,6 +28,8 @@
  * @module
  */
 
+export { Channel } from './src/channel.ts'
+export { IO } from './src/io.ts'
 export { Project } from './src/project.ts'
 export { Redpitaya } from './src/redpitaya.ts'
 export type {
