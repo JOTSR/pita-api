@@ -4,7 +4,7 @@ import { ProjectConfig, Redpitaya } from '../mod.ts'
  * Project represent the host configuration.
  * @example
  * ```ts
- * const app = Project.init(projectConfig, initialState)
+ * const redpitaya = await Project.init(projectConfig)
  * ```
  */
 export class Project {
