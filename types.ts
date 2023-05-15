@@ -12,7 +12,7 @@ export type Tuple<TItem, TLength extends number> = [TItem, ...TItem[]] & {
 	length: TLength
 }
 
-export type MessageId = PinId | ChannelId | CustomId
+export type MessageId = IoId | ChannelId | CustomId
 
 export enum IOMode {
 	RO,
@@ -77,7 +77,7 @@ export enum Trigger {
 	AWGNegativeEdge,
 }
 
-export const Pin = {
+export const IoPin = {
 	digital: {
 		led0: 'digital_led_0',
 		led1: 'digital_led_1',
@@ -115,9 +115,9 @@ export const Pin = {
 	},
 } as const
 
-export type PinId =
-	| typeof Pin.digital[keyof typeof Pin.digital]
-	| typeof Pin.analog[keyof typeof Pin.analog]
+export type IoId =
+	| typeof IoPin.digital[keyof typeof IoPin.digital]
+	| typeof IoPin.analog[keyof typeof IoPin.analog]
 
 export const ChannelPin = {
 	adc1: 'channel_adc_1',
