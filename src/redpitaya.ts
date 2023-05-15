@@ -13,6 +13,19 @@ import { IO } from './io.ts'
 import { Channel } from './channel.ts'
 import { JsonParseStream } from '../deps.ts'
 
+/**
+ * The Redpitaya class provides a way to exchange messages with a Redpitaya device and control its
+ * digital and analog inputs and outputs.
+ * Redpitaya class is a proxy for Redpitaya low level API.
+ * @example
+ * ```ts
+ * const redpitaya = await Project.init(config)
+ * await redpitaya.channel.dac1.writeSlice([0, 0, 0, 256, 256, 256, 0, 0, 0])
+ * console.log('Gate signal on DAC 1')
+ * await redpitaya.pin.digital.led1.write(true)
+ * console.log('Led 1 is ON')
+ * ```
+ */
 export class Redpitaya {
 	#readable: ReadableStream<MessageData>
 	#writable: WritableStream<string>
@@ -191,6 +204,15 @@ export class Redpitaya {
 		} as const
 	}
 
+	/**
+	 * List of Redpitaya fast analog IOs.
+	 * @example
+	 * ```ts
+	 * const redpitaya = await Project.init(config)
+	 * await redpitaya.channel.dac1.writeSlice([0, 0, 0, 256, 256, 256, 0, 0, 0])
+	 * console.log('Gate signal on DAC 1')
+	 * ```
+	 */
 	get channel() {
 		return {
 			adc1: new Channel({
@@ -220,6 +242,15 @@ export class Redpitaya {
 		} as const
 	}
 
+	/**
+	 * List of Redpitaya digital and slow analog IOs.
+	 * @example
+	 * ```ts
+	 * const redpitaya = await Project.init(config)
+	 * await redpitaya.pin.digital.led1.write(true)
+	 * console.log('Led 1 is ON')
+	 * ```
+	 */
 	get pin() {
 		return {
 			analog: this.#analog,
@@ -227,6 +258,12 @@ export class Redpitaya {
 		}
 	}
 
+	/**
+	 * Exchange messages with Redpitaya. Send and recieve signals and parameters from Redpitaya backend.
+	 * @param {string} type Messages type ('signals' | 'parameters').
+	 * @param {MessageId} key Message id is JSON key used for coupling message data between frontend and backend.
+	 * @returns Connection interface.
+	 */
 	connection<T extends 'signals' | 'parameters'>(type: T, key: MessageId) {
 		return {
 			read: () => this.#read(type, key),
