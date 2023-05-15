@@ -9,7 +9,7 @@ import {
 } from '../types.ts'
 
 /**
- * Interface for Redpitaya fast analog IOs
+ * Interface for Redpitaya fast analog IOs.
  * @example
  * ```ts
  * const adc1 = new Channel({
@@ -44,14 +44,15 @@ export class Channel<Mode extends IOMode> {
 	}
 
 	/**
-	 * Reads a buffered slice of adc input
-	 * @param {Size} bufferSize - `bufferSize` is a generic type parameter that represents the size of the
-	 * buffer to be read from the connection. It is a number that specifies the number of bytes to be read
-	 * from the connection. The function returns a promise that resolves to a tuple containing the number
-	 * of bytes read and the buffer of
-	 * @returns A tuple containing a number and a value of type `Size`, which is a generic type parameter
-	 * representing a number. The returned value is obtained by slicing the `value` property of an object
-	 * that is read from a connection.
+	 * Reads a buffered slice from adc input.
+	 * @param {Size} bufferSize - Size of the slice buffered by the backend.
+	 * @returns Signal value as number tuple of buffer size.
+	 * @example
+	 * ```ts
+	 * //ADC 125MHz
+	 * //Get voltage on 1µs
+	 * const voltage = await adc1.readSlice(125)
+	 * ```
 	 */
 	async readSlice<Size extends number>(
 		bufferSize: Size,
@@ -68,6 +69,18 @@ export class Channel<Mode extends IOMode> {
 			: Tuple<number, Size>
 	}
 
+	/**
+	 * Writes a slice of points to dac.
+	 * @param {number[]} buffer - Buffer to write.
+	 * @example
+	 * ```ts
+	 * import { randomIntArray } from 'https://deno.land/x/denum@v1.2.0/mod.ts'
+	 * //DAC 16bits @ 125MHz
+	 * //Set voltage for 1µs
+	 * const voltage = randomIntArray(0, 2 ** 16, 125)
+	 * await dac1.writeSlice(voltage)
+	 * ```
+	 */
 	writeSlice(
 		buffer: number[],
 	): Promise<Mode extends IOMode.RO ? never : void> {
@@ -80,6 +93,19 @@ export class Channel<Mode extends IOMode> {
 		}) as Promise<Mode extends IOMode.RO ? never : void>
 	}
 
+	/**
+	 * Continuously read a buffered slice from adc input.
+	 * @param {Size} bufferSize - Size of the slice buffered by the backend.
+	 * @returns Async iterator of signal value as number tuple of buffer size.
+	 * @example
+	 * ```ts
+	 * //ADC 125MHz
+	 * //Get voltage on 1µs continuously
+	 * for await (const voltage of adc1.readIter(125)) {
+	 * 	console.log(voltage)
+	 * }
+	 * ```
+	 */
 	async *readIter<Size extends number>(
 		bufferSize: Size,
 	): AsyncGenerator<
@@ -101,6 +127,21 @@ export class Channel<Mode extends IOMode> {
 		}
 	}
 
+	/**
+	 * Continously write a slice of points to dac.
+	 * @returns Async iterator.
+	 * @example
+	 * ```ts
+	 * import { randomIntArray } from 'https://deno.land/x/denum@v1.2.0/mod.ts'
+	 * //DAC 16bits @ 125MHz
+	 * //Set voltage for 1µs continuously
+	 * const write = adc1.writeIter()
+	 * while (true) {
+	 * 	const voltage = randomIntArray(0, 2 ** 16, 125)
+	 * 	await write.next(voltage)
+	 * }
+	 * ```
+	 */
 	writeIter(): Mode extends IOMode.WO ? never
 		: AsyncGenerator<void, void, SignalDatas> {
 		if (this.#mode === IOMode.RO) {
@@ -110,6 +151,14 @@ export class Channel<Mode extends IOMode> {
 			: AsyncGenerator<void, void, SignalDatas>
 	}
 
+	/**
+	 * Set the bitness of the Channel.
+	 * @param {Bitness<16n>} bitness - The "bitness" parameter is a value that represents the number of bits used in the ADC/DAC.
+	 * @example
+	 * ```ts
+	 * adc1.bitness = 8n
+	 * ```
+	 */
 	set bitness(bitness: Bitness<16n>) {
 		if (bitness < 1n || bitness > 16n) {
 			throw new RangeError(
@@ -117,6 +166,11 @@ export class Channel<Mode extends IOMode> {
 			)
 		}
 	}
+
+	/**
+	 * Get the bitness of the Channel.
+	 * @returns bitness - The "bitness" parameter is a value that represents the number of bits used in the ADC/DAC.
+	 */
 	get bitness(): Bitness<16n> {
 		return this.#bitness
 	}
