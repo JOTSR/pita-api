@@ -1,5 +1,16 @@
 import { Bitness, IOMode, IOType, RPConnection } from '../types.ts'
 
+/**
+ * Interface for Redpitaya digital and slow analog IOs.
+ * @example
+ * ```ts
+ * const dio6p = new IO({
+ * 	mode: IOMode.RW,
+ * 	type: IOType.Digital,
+ * 	connection: this.connection('parameters', Pin.digital.io6p),
+ * })
+ * ```
+ */
 export class IO<Mode extends IOMode, Type extends IOType> {
 	#mode: IOMode
 	#type: IOType
@@ -23,6 +34,14 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 		this.#connection = connection
 	}
 
+	/**
+	 * Writes a value from IO.
+	 * @param {number | boolean} value - Value to write.
+	 * @example
+	 * ```ts
+	 * await dio6p.write(true)
+	 * ```
+	 */
 	write(
 		value: Mode extends IOMode.RO ? never
 			: Type extends IOType.Digital ? boolean
@@ -32,6 +51,14 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 		return this.#connection.write(value)
 	}
 
+	/**
+	 * Reads a value from IO.
+	 * @returns {number | boolean} value - Readed value.
+	 * @example
+	 * ```ts
+	 * const state = await dio6p.read()
+	 * ```
+	 */
 	async read(): Promise<
 		Mode extends IOMode.WO ? never
 			: Type extends IOType.Digital ? boolean
@@ -52,13 +79,42 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	//TODO add readSlice
 	//TODO add writeSlice
 
+	/**
+	 * Continuously read a value from IO.
+	 * @example
+	 * ```ts
+	 * for await (const state of dio6p.readIter()) {
+	 * 	console.log(state)
+	 * }
+	 * ```
+	 */
 	readIter() {
 		return this.#connection.readIter
 	}
+
+	/**
+	 * Continuously write a value to IO.
+	 * @example
+	 * ```ts
+	 * const write = dio6p.readIter()
+	 * while (true) {
+	 * 	await write.next(Math.random() > 0.5)
+	 * }
+	 * ```
+	 */
 	writeIter() {
 		return this.#connection.writeIter
 	}
 
+	/**
+	 * Set the bitness of the IO.
+	 * Only for Analog IOs.
+	 * @param {Bitness<12n>} bitness - The "bitness" parameter is a value that represents the number of bits used in the ADC/DAC.
+	 * @example
+	 * ```ts
+	 * analogOut1.bitness = 4n
+	 * ```
+	 */
 	set bitness(bitness: Bitness<12n>) {
 		if ((bitness < 1n || bitness > 12n) && this.#type === IOType.Analog) {
 			throw new RangeError(
@@ -71,6 +127,11 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 			)
 		}
 	}
+
+	/**
+	 * Get the bitness of the IO.
+	 * Only for Analog IOs.
+	 */
 	get bitness(): Bitness<12n> {
 		return this.#bitness
 	}
