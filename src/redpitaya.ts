@@ -11,7 +11,7 @@ import {
 } from '../types.ts'
 import { IO } from './io.ts'
 import { Channel } from './channel.ts'
-import { jsonStream } from './utils.ts'
+import { JsonParseStream } from '../deps.ts'
 
 export class Redpitaya {
 	#readable: ReadableStream<MessageData>
@@ -23,7 +23,7 @@ export class Redpitaya {
 			//@ts-ignore TODO fix definition
 			.pipeThrough(new DecompressionStream('gzip'))
 			.pipeThrough(new TextDecoderStream())
-			.pipeThrough(jsonStream.parse<MessageData>())
+			.pipeThrough(new JsonParseStream()) as ReadableStream<MessageData>
 	}
 
 	#digital() {
