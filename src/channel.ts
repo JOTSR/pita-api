@@ -1,5 +1,6 @@
 import {
 	Bitness,
+	ChannelId,
 	Frequency,
 	IOMode,
 	RPConnection,
@@ -26,7 +27,7 @@ export class Channel<Mode extends IOMode> {
 	#trigger: Trigger = Trigger.Disabled
 
 	#mode: IOMode
-	#connection: RPConnection<'signals'>
+	#connection: RPConnection<'signals', ChannelId>
 	#bufferSize = 1
 
 	constructor(
@@ -34,7 +35,7 @@ export class Channel<Mode extends IOMode> {
 			mode: Mode
 			frequency: Frequency
 			bitness: Bitness<16n>
-			connection: RPConnection<'signals'>
+			connection: RPConnection<'signals', ChannelId>
 		},
 	) {
 		this.#mode = mode
@@ -59,6 +60,11 @@ export class Channel<Mode extends IOMode> {
 	): Promise<Mode extends IOMode.WO ? never : Tuple<number, Size>> {
 		if (this.#mode === IOMode.WO) {
 			throw new TypeError(`can't read write only IO`)
+		}
+		if (this.#trigger === Trigger.Disabled) {
+			throw new Error(
+				'channel trigger is set to "Disabled", no data can be processed',
+			)
 		}
 		if (this.#bufferSize !== bufferSize) {
 			//TODO send buffersize to backend
@@ -86,6 +92,11 @@ export class Channel<Mode extends IOMode> {
 	): Promise<Mode extends IOMode.RO ? never : void> {
 		if (this.#mode === IOMode.RO) {
 			throw new TypeError(`can't write read only IO`)
+		}
+		if (this.#trigger === Trigger.Disabled) {
+			throw new Error(
+				'channel trigger is set to "Disabled", no data can be processed',
+			)
 		}
 		return this.#connection.write({
 			size: buffer.length,
@@ -115,6 +126,11 @@ export class Channel<Mode extends IOMode> {
 	> {
 		if (this.#mode === IOMode.WO) {
 			throw new TypeError(`can't read write only IO`)
+		}
+		if (this.#trigger === Trigger.Disabled) {
+			throw new Error(
+				'channel trigger is set to "Disabled", no data can be processed',
+			)
 		}
 		while (true) {
 			const { done, value } = await this.#connection.readIter.next()
@@ -146,6 +162,11 @@ export class Channel<Mode extends IOMode> {
 		if (this.#mode === IOMode.RO) {
 			throw new TypeError(`can't write read only IO`)
 		}
+		if (this.#trigger === Trigger.Disabled) {
+			throw new Error(
+				'channel trigger is set to "Disabled", no data can be processed',
+			)
+		}
 		return this.#connection.writeIter as Mode extends IOMode.WO ? never
 			: AsyncIterator<(data: SignalDatas) => Promise<void>, void, void>
 	}
@@ -164,6 +185,8 @@ export class Channel<Mode extends IOMode> {
 				`${bitness} is invalid bitness for ACD, allowed range is (0n < bitness < 17n)`,
 			)
 		}
+		this.#bitness = bitness
+		this.#connection.setConfig('bitness', { value: Number(bitness) })
 	}
 
 	/**
@@ -172,5 +195,52 @@ export class Channel<Mode extends IOMode> {
 	 */
 	get bitness(): Bitness<16n> {
 		return this.#bitness
+	}
+
+	/**
+	 * Set the clock frequency of the Channel.
+	 * @param {Frequency} frequency - The frequency parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
+	 * @example
+	 * ```ts
+	 * adc1.frequency = Frequency.SMP_125M
+	 * ```
+	 */
+	set frequency(frequency: Frequency) {
+		this.#frequency = frequency
+		this.#connection.setConfig('frequency', { value: Number(frequency) })
+	}
+
+	/**
+	 * Get the frequency of the Channel.
+	 * @returns frequency - The frequency parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
+	 */
+	get frequency(): Frequency {
+		return this.#frequency
+	}
+
+	/**
+	 * Set the clock trigger of the Channel.
+	 * @param {Trigger} trigger - The trigger parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
+	 * @example
+	 * ```ts
+	 * adc1.trigger = Trigger.Now
+	 * //channel start to acquire
+	 * await adc1.readSlice(125) //ok
+	 * adc1.trigger = Trigger.Disabled
+	 * //channel stop to acquire
+	 * await adc1.readSlice(125) //error
+	 * ```
+	 */
+	set trigger(trigger: Trigger) {
+		this.#trigger = trigger
+		this.#connection.setConfig('trigger', { value: Number(trigger) })
+	}
+
+	/**
+	 * Get the trigger of the Channel.
+	 * @returns trigger - The trigger parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
+	 */
+	get trigger(): Trigger {
+		return this.#trigger
 	}
 }
