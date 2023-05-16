@@ -67,8 +67,10 @@ export class Channel<Mode extends IOMode> {
 			)
 		}
 		if (this.#bufferSize !== bufferSize) {
-			//TODO send buffersize to backend
-			// this.#connection.write()
+			this.#bufferSize = bufferSize
+			await this.#connection.setConfig('buffer_size', {
+				value: bufferSize,
+			})
 		}
 		const { value } = await this.#connection.read()
 		return value.slice(bufferSize) as Mode extends IOMode.WO ? never
@@ -87,7 +89,7 @@ export class Channel<Mode extends IOMode> {
 	 * await dac1.writeSlice(voltage)
 	 * ```
 	 */
-	writeSlice(
+	async writeSlice(
 		buffer: number[],
 	): Promise<Mode extends IOMode.RO ? never : void> {
 		if (this.#mode === IOMode.RO) {
@@ -97,6 +99,12 @@ export class Channel<Mode extends IOMode> {
 			throw new Error(
 				'channel trigger is set to "Disabled", no data can be processed',
 			)
+		}
+		if (this.#bufferSize !== buffer.length) {
+			this.#bufferSize = buffer.length
+			await this.#connection.setConfig('buffer_size', {
+				value: buffer.length,
+			})
 		}
 		return this.#connection.write({
 			size: buffer.length,
