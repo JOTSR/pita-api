@@ -211,7 +211,7 @@ export class Channel<Mode extends IOMode> {
 	}
 
 	/**
-	 * Get the frequency of the Channel.
+	 * Get the clock frequency of the Channel.
 	 * @returns frequency - The frequency parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
 	 */
 	get frequency(): Frequency {
@@ -219,8 +219,8 @@ export class Channel<Mode extends IOMode> {
 	}
 
 	/**
-	 * Set the clock trigger of the Channel.
-	 * @param {Trigger} trigger - The trigger parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
+	 * Set the trigger of the Channel.
+	 * @param {Trigger} trigger - The trigger parameter is a value that which event launch processing.
 	 * @example
 	 * ```ts
 	 * adc1.trigger = Trigger.Now
@@ -238,7 +238,7 @@ export class Channel<Mode extends IOMode> {
 
 	/**
 	 * Get the trigger of the Channel.
-	 * @returns trigger - The trigger parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
+	 * @returns trigger - The trigger parameter is a value that which event launch processing.
 	 */
 	get trigger(): Trigger {
 		return this.#trigger
