@@ -1,4 +1,4 @@
-import { Bitness, IOMode, IOType, RPConnection } from '../types.ts'
+import { Bitness, IoId, IOMode, IOType, RPConnection } from '../types.ts'
 
 /**
  * Interface for Redpitaya digital and slow analog IOs.
@@ -15,8 +15,10 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	#mode: IOMode
 	#type: IOType
 	#bitness: Bitness<12n> = 1n
+	#active = false
 	#connection: RPConnection<
-		Type extends IOType.Digital ? 'parameters' : 'signals'
+		Type extends IOType.Digital ? 'parameters' : 'signals',
+		IoId
 	>
 	constructor(
 		{ mode, type, bitness = 1n, connection }: {
@@ -24,7 +26,8 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 			type: Type
 			bitness?: Bitness<12n>
 			connection: RPConnection<
-				Type extends IOType.Digital ? 'parameters' : 'signals'
+				Type extends IOType.Digital ? 'parameters' : 'signals',
+				IoId
 			>
 		},
 	) {
@@ -47,6 +50,11 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 			: Type extends IOType.Digital ? boolean
 			: number,
 	): Promise<void> {
+		if (!this.#active && this.#type === IOType.Analog) {
+			throw new Error(
+				'analog IO "active" parameter is set to "false", no data can be processed',
+			)
+		}
 		//@ts-ignore TODO implement better type checking
 		return this.#connection.write(value)
 	}
@@ -66,6 +74,11 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	> {
 		if (this.#mode === IOMode.WO) {
 			throw new TypeError(`can't read write only pin`)
+		}
+		if (!this.#active && this.#type === IOType.Analog) {
+			throw new Error(
+				'analog IO "active" parameter is set to "false", no data can be processed',
+			)
 		}
 		const datas = await this.#connection.read()
 		if ('size' in datas) {
@@ -89,6 +102,11 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 * ```
 	 */
 	readIter() {
+		if (!this.#active && this.#type === IOType.Analog) {
+			throw new Error(
+				'analog IO "active" parameter is set to "false", no data can be processed',
+			)
+		}
 		return this.#connection.readIter
 	}
 
@@ -102,6 +120,11 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 * ```
 	 */
 	writeIter() {
+		if (!this.#active && this.#type === IOType.Analog) {
+			throw new Error(
+				'analog IO "active" parameter is set to "false", no data can be processed',
+			)
+		}
 		return this.#connection.writeIter
 	}
 
@@ -125,6 +148,8 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 				`${bitness} is invalid bitness for Digital IO, bitness must be 1n`,
 			)
 		}
+		this.#bitness = bitness
+		this.#connection.setConfig('bitness', { value: Number(bitness) })
 	}
 
 	/**
@@ -133,5 +158,38 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 */
 	get bitness(): Bitness<12n> {
 		return this.#bitness
+	}
+
+	/**
+	 * Set the state of the IO.
+	 * Only for Analog IOs.
+	 * @param {active<12n>} active - The "active" parameter enable or disable the analog IO.
+	 * @example
+	 * ```ts
+	 * analogIn1.active = true
+	 * //analog in 1 start to acquire
+	 * await analogIn1.read() //ok
+	 * analogOut1.active = false
+	 * //analog in 1 stop to acquire
+	 * await analogIn1.read() //error
+	 * ```
+	 */
+	set active(active: boolean) {
+		if (this.#type === IOType.Digital) {
+			throw new RangeError(
+				'invalid active parameter is invalid for Digital IO',
+			)
+		}
+		this.#active = active
+		this.#connection.setConfig('active', { value: Boolean(active) })
+	}
+
+	/**
+	 * Get the state of the IO.
+	 * Only for Analog IOs.
+	 * @return active - The "active" parameter enable or disable the analog IO.
+	 */
+	get active(): boolean {
+		return this.#active
 	}
 }
