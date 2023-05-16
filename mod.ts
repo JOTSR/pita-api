@@ -1,11 +1,6 @@
 /**
  * # Pita api
  *
- * [![deno module](https://shield.deno.dev/x/pita_api)](https://deno.land/x/pita_api)
- * ![GitHub](https://img.shields.io/github/license/JOTSR/pita-api?style=flat-square)
- * ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/JOTSR/pita-cli/ci.yml?style=flat-square)
- * ![deno doc](https://img.shields.io/static/v1?logo=deno&label=deno&message=doc&color=blue&style=flat-square)
- *
  * Simpliest way to develop secure and powerful app for redpitaya.
  *
  * Pita 🫓 api provide frontend proxy to [Redpitaya](https://redpitaya.com/) low level API. Pita api allows you to manage your Redpitaya board without worring about backend, and with [Pita cli](https://deno.land/x/pita), build and implement your webapp with a robust and secure environement. It handle all your workflow, from tooling installation to testing, benching and publishing.
@@ -26,6 +21,7 @@
  * ```
  *
  * @module
+ * @license MIT
  */
 
 export { Channel } from './src/channel.ts'
