@@ -149,12 +149,12 @@ export type RPConnection<
 	write: (
 		datas: T extends 'signals' ? SignalDatas : ParameterDatas,
 	) => Promise<void>
-	readIter: AsyncIterator<
+	readIter: AsyncGenerator<
 		T extends 'signals' ? SignalDatas : ParameterDatas,
 		void,
 		unknown
 	>
-	writeIter: AsyncIterator<
+	writeIter: AsyncGenerator<
 		(
 			data: T extends 'signals' ? SignalDatas : ParameterDatas,
 		) => Promise<void>,
