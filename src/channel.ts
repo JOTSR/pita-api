@@ -140,6 +140,12 @@ export class Channel<Mode extends IOMode> {
 				'channel trigger is set to "Disabled", no data can be processed',
 			)
 		}
+		if (this.#bufferSize !== bufferSize) {
+			this.#bufferSize = bufferSize
+			await this.#connection.setConfig('buffer_size', {
+				value: bufferSize,
+			})
+		}
 		while (true) {
 			const { done, value } = await this.#connection.readIter.next()
 			if (done) {
@@ -159,14 +165,15 @@ export class Channel<Mode extends IOMode> {
 	 * import { randomIntArray } from 'https://deno.land/x/denum@v1.2.0/mod.ts'
 	 * //DAC 16bits @ 125MHz
 	 * //Set voltage for 1µs continuously
-	 * for await (const write of adc1.writeIter()) {
+	 * for await (const write of adc1.writeIter(125)) {
 	 * 	const voltage = randomIntArray(0, 2 ** 16, 125)
 	 * 	await write(voltage)
 	 * }
 	 * ```
 	 */
-	writeIter(): Mode extends IOMode.WO ? never
-		: AsyncGenerator<(data: SignalDatas) => Promise<void>, void, void> {
+	async *writeIter<Size extends number>(
+		bufferSize: Size,
+	): AsyncGenerator<(data: SignalDatas) => Promise<void>, void, void> {
 		if (this.#mode === IOMode.RO) {
 			throw new TypeError(`can't write read only IO`)
 		}
@@ -175,8 +182,13 @@ export class Channel<Mode extends IOMode> {
 				'channel trigger is set to "Disabled", no data can be processed',
 			)
 		}
-		return this.#connection.writeIter as Mode extends IOMode.WO ? never
-			: AsyncGenerator<(data: SignalDatas) => Promise<void>, void, void>
+		if (this.#bufferSize !== bufferSize) {
+			this.#bufferSize = bufferSize
+			await this.#connection.setConfig('buffer_size', {
+				value: bufferSize,
+			})
+		}
+		yield* this.#connection.writeIter
 	}
 
 	/**
