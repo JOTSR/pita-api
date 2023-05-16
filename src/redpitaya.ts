@@ -253,8 +253,8 @@ export class Redpitaya {
 	 */
 	get pin() {
 		return {
-			analog: this.#analog,
-			digital: this.#digital,
+			analog: this.#analog(),
+			digital: this.#digital(),
 		}
 	}
 
