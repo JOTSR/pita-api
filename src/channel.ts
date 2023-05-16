@@ -107,7 +107,7 @@ export class Channel<Mode extends IOMode> {
 	/**
 	 * Continuously read a buffered slice from adc input.
 	 * @param {Size} bufferSize - Size of the slice buffered by the backend.
-	 * @returns Async iterator of signal value as number tuple of buffer size.
+	 * @returns Async generator of signal value as number tuple of buffer size.
 	 * @example
 	 * ```ts
 	 * //ADC 125MHz
@@ -119,7 +119,7 @@ export class Channel<Mode extends IOMode> {
 	 */
 	async *readIter<Size extends number>(
 		bufferSize: Size,
-	): AsyncIterator<
+	): AsyncGenerator<
 		Mode extends IOMode.WO ? never : Tuple<number, Size>,
 		void,
 		void
@@ -145,7 +145,7 @@ export class Channel<Mode extends IOMode> {
 
 	/**
 	 * Continously write a slice of points to dac.
-	 * @returns Async iterator.
+	 * @returns Async generator.
 	 * @example
 	 * ```ts
 	 * import { randomIntArray } from 'https://deno.land/x/denum@v1.2.0/mod.ts'
@@ -158,7 +158,7 @@ export class Channel<Mode extends IOMode> {
 	 * ```
 	 */
 	writeIter(): Mode extends IOMode.WO ? never
-		: AsyncIterator<(data: SignalDatas) => Promise<void>, void, void> {
+		: AsyncGenerator<(data: SignalDatas) => Promise<void>, void, void> {
 		if (this.#mode === IOMode.RO) {
 			throw new TypeError(`can't write read only IO`)
 		}
@@ -168,7 +168,7 @@ export class Channel<Mode extends IOMode> {
 			)
 		}
 		return this.#connection.writeIter as Mode extends IOMode.WO ? never
-			: AsyncIterator<(data: SignalDatas) => Promise<void>, void, void>
+			: AsyncGenerator<(data: SignalDatas) => Promise<void>, void, void>
 	}
 
 	/**
