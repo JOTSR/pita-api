@@ -27,7 +27,7 @@ export enum IOType {
 
 export type Bitness<T extends 12n | 16n> = T extends 12n
 	? 1n | 2n | 3n | 4n | 5n | 6n | 7n | 8n | 9n | 10n | 12
-	: 
+	:
 		| 1n
 		| 2n
 		| 3n
@@ -135,15 +135,17 @@ export type RPConnection<T extends 'signals' | 'parameters'> = {
 	write: (
 		datas: T extends 'signals' ? SignalDatas : ParameterDatas,
 	) => Promise<void>
-	readIter: AsyncGenerator<
+	readIter: AsyncIterator<
 		T extends 'signals' ? SignalDatas : ParameterDatas,
 		void,
 		unknown
 	>
-	writeIter: AsyncGenerator<
+	writeIter: AsyncIterator<
+		(
+			data: T extends 'signals' ? SignalDatas : ParameterDatas,
+		) => Promise<void>,
 		void,
-		void,
-		T extends 'signals' ? SignalDatas : ParameterDatas
+		void
 	>
 }
 

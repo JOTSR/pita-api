@@ -108,7 +108,7 @@ export class Channel<Mode extends IOMode> {
 	 */
 	async *readIter<Size extends number>(
 		bufferSize: Size,
-	): AsyncGenerator<
+	): AsyncIterator<
 		Mode extends IOMode.WO ? never : Tuple<number, Size>,
 		void,
 		void
@@ -135,20 +135,19 @@ export class Channel<Mode extends IOMode> {
 	 * import { randomIntArray } from 'https://deno.land/x/denum@v1.2.0/mod.ts'
 	 * //DAC 16bits @ 125MHz
 	 * //Set voltage for 1µs continuously
-	 * const write = adc1.writeIter()
-	 * while (true) {
+	 * for await (const write of adc1.writeIter()) {
 	 * 	const voltage = randomIntArray(0, 2 ** 16, 125)
-	 * 	await write.next(voltage)
+	 * 	await write(voltage)
 	 * }
 	 * ```
 	 */
 	writeIter(): Mode extends IOMode.WO ? never
-		: AsyncGenerator<void, void, SignalDatas> {
+		: AsyncIterator<(data: SignalDatas) => Promise<void>, void, void> {
 		if (this.#mode === IOMode.RO) {
 			throw new TypeError(`can't write read only IO`)
 		}
 		return this.#connection.writeIter as Mode extends IOMode.WO ? never
-			: AsyncGenerator<void, void, SignalDatas>
+			: AsyncIterator<(data: SignalDatas) => Promise<void>, void, void>
 	}
 
 	/**

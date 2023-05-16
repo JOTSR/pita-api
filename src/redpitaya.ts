@@ -291,11 +291,11 @@ export class Redpitaya {
 		key: MessageId,
 		datas: T extends 'signals' ? SignalDatas : ParameterDatas,
 	): Promise<void> {
-		const { done, value } = await this.#writeIter(type, key).next(datas)
+		const { done, value } = await this.#writeIter(type, key).next()
 		if (done) {
 			throw new Error(`no datas recieved for { ${type}: ${key} }`)
 		}
-		return value
+		return value(datas)
 	}
 
 	async *#readIter<T extends 'signals' | 'parameters'>(
@@ -318,16 +318,17 @@ export class Redpitaya {
 				},
 			}),
 		).getReader()
+
 		while (true) {
 			const { done, value } = await filtered.read()
 			if (done) break
 			if ('signals' in value) {
-				//@ts-ignore TODO fix type inference
-				yield value.signals[key]
+				yield value.signals[key] as T extends 'signals' ? SignalDatas
+					: ParameterDatas
 			}
 			if ('parameters' in value) {
-				//@ts-ignore TODO fix type inference
-				yield value.parameters[key]
+				yield value.parameters[key] as T extends 'signals' ? SignalDatas
+					: ParameterDatas
 			}
 		}
 	}
@@ -335,15 +336,15 @@ export class Redpitaya {
 	async *#writeIter<T extends 'signals' | 'parameters'>(
 		type: T,
 		key: MessageId,
-	): AsyncGenerator<
-		void,
-		void,
-		T extends 'signals' ? SignalDatas : ParameterDatas
-	> {
+	): AsyncGenerator<typeof writer, void, void> {
+		const writer = (
+			data: T extends 'signals' ? SignalDatas : ParameterDatas,
+		) => this.#writable.getWriter().write(
+			JSON.stringify({ [type]: { [key]: data } }),
+		)
+
 		while (true) {
-			this.#writable.getWriter().write(
-				JSON.stringify({ [type]: { [key]: yield } }),
-			)
+			yield writer
 		}
 	}
 }

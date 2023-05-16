@@ -96,9 +96,8 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 * Continuously write a value to IO.
 	 * @example
 	 * ```ts
-	 * const write = dio6p.readIter()
-	 * while (true) {
-	 * 	await write.next(Math.random() > 0.5)
+	 * for await (const write of dio6p.writeIter()) {
+	 * 	await write(Math.random() > 0.5)
 	 * }
 	 * ```
 	 */
