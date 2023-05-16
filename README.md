@@ -7,7 +7,7 @@
 [![deno module](https://shield.deno.dev/x/pita_api)](https://deno.land/x/pita_api)
 ![GitHub](https://img.shields.io/github/license/JOTSR/pita-api?style=flat-square)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/JOTSR/pita-cli/ci.yml?style=flat-square)
-![deno doc](https://img.shields.io/static/v1?logo=deno&label=deno&message=doc&color=blue&style=flat-square)
+[![deno doc](https://img.shields.io/static/v1?logo=deno&label=deno&message=doc&color=blue&style=flat-square)](https://deno.land/x/pita_api/mod.ts)
 
 Simpliest way to develop secure and powerful app for redpitaya.
 
