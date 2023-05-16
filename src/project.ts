@@ -1,4 +1,5 @@
-import { ProjectConfig, Redpitaya } from '../mod.ts'
+import { Redpitaya } from '../mod.ts'
+import { ProjectConfig } from '../types.ts'
 
 /**
  * Project represent the host configuration.
