@@ -12,7 +12,7 @@ export type Tuple<TItem, TLength extends number> = [TItem, ...TItem[]] & {
 	length: TLength
 }
 
-export type MessageId = IoId | ChannelId | CustomId
+export type MessageId = IoId | ChannelId | ConfigId | CustomId
 
 export enum IOMode {
 	RO,
@@ -130,7 +130,21 @@ export type ChannelId = typeof ChannelPin[keyof typeof ChannelPin]
 
 export type CustomId = `custom_${string}`
 
-export type RPConnection<T extends 'signals' | 'parameters'> = {
+export type ConfigName = {
+	io: 'bitness' | 'active'
+	channel: 'bitness' | 'frequency' | 'trigger' | 'buffer_size'
+	custom: string
+}
+
+export type ConfigId =
+	| `${IoId}#${ConfigName['io']}`
+	| `${ChannelId}#${ConfigName['channel']}`
+	| `${CustomId}#${string}`
+
+export type RPConnection<
+	T extends 'signals' | 'parameters',
+	K extends Exclude<MessageId, ConfigId>,
+> = {
 	read: () => Promise<T extends 'signals' ? SignalDatas : ParameterDatas>
 	write: (
 		datas: T extends 'signals' ? SignalDatas : ParameterDatas,
@@ -147,6 +161,17 @@ export type RPConnection<T extends 'signals' | 'parameters'> = {
 		void,
 		void
 	>
+	getConfig: (
+		name: K extends IoId ? ConfigName['io']
+			: K extends ChannelId ? ConfigName['channel']
+			: ConfigName['custom'],
+	) => Promise<ParameterDatas>
+	setConfig: (
+		name: K extends IoId ? ConfigName['io']
+			: K extends ChannelId ? ConfigName['channel']
+			: ConfigName['custom'],
+		data: ParameterDatas,
+	) => Promise<void>
 }
 
 export type JsonValue = boolean | number | string | null | JsonValue[] | {

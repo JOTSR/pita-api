@@ -1,5 +1,6 @@
 import {
 	ChannelPin,
+	ConfigId,
 	Frequency,
 	IOMode,
 	IoPin,
@@ -7,6 +8,7 @@ import {
 	MessageData,
 	MessageId,
 	ParameterDatas,
+	RPConnection,
 	SignalDatas,
 } from '../types.ts'
 import { IO } from './io.ts'
@@ -260,19 +262,27 @@ export class Redpitaya {
 
 	/**
 	 * Exchange messages with Redpitaya. Send and recieve signals and parameters from Redpitaya backend.
-	 * @param {string} type Messages type ('signals' | 'parameters').
-	 * @param {MessageId} key Message id is JSON key used for coupling message data between frontend and backend.
+	 * @param {'signals' | 'parameters'} type Messages type.
+	 * @param {Exclude<MessageId, ConfigId>} key Message id is JSON key used for coupling message data between frontend and backend.
 	 * @returns Connection interface.
 	 */
-	connection<T extends 'signals' | 'parameters'>(type: T, key: MessageId) {
+	connection<
+		T extends 'signals' | 'parameters',
+		K extends Exclude<MessageId, ConfigId>,
+	>(
+		type: T,
+		key: K,
+	) {
 		return {
 			read: () => this.#read(type, key),
-			write: (
-				datas: T extends 'signals' ? SignalDatas : ParameterDatas,
-			) => this.#write(type, key, datas),
+			write: (datas) => this.#write(type, key, datas),
 			readIter: this.#readIter(type, key),
 			writeIter: this.#writeIter(type, key),
-		}
+			getConfig: (name) =>
+				this.#read('parameters', `${key}#${name}` as ConfigId),
+			setConfig: (name, data) =>
+				this.#write('parameters', `${key}#${name}` as ConfigId, data),
+		} as RPConnection<T, K>
 	}
 
 	async #read<T extends 'signals' | 'parameters'>(
