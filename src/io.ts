@@ -7,7 +7,7 @@ import { Bitness, IoId, IOMode, IOType, RPConnection } from '../types.ts'
  * const dio6p = new IO({
  * 	mode: IOMode.RW,
  * 	type: IOType.Digital,
- * 	connection: this.connection('parameters', Pin.digital.io6p),
+ * 	connection: redpitaya.connection('parameters', Pin.digital.io6p),
  * })
  * ```
  */
@@ -181,7 +181,7 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 				'invalid active parameter is invalid for Digital IO',
 			)
 		}
-		await this.#connection.setConfig('active', { value: Boolean(active) })
+		await this.#connection.setConfig('active', { value: active })
 		this.#active = active
 	}
 

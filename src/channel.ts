@@ -17,7 +17,7 @@ import {
  * 	 mode: IOMode.RO,
  * 	 bitness: 16n,
  * 	 frequency: Frequency.SMP_125M,
- * 	 connection: Redpitaya.connection('signals', ChannelPin.adc1),
+ * 	 connection: redpitaya.connection('signals', ChannelPin.adc1),
  * })
  * ```
  */
