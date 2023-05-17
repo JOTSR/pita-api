@@ -38,10 +38,11 @@ export class Channel<Mode extends IOMode> {
 			connection: RPConnection<'signals', ChannelId>
 		},
 	) {
+		//! required to #connection in first
+		this.#connection = connection
 		this.#mode = mode
 		this.#frequency = frequency
 		this.bitness = bitness
-		this.#connection = connection
 	}
 
 	/**

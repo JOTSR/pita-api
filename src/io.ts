@@ -31,10 +31,11 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 			>
 		},
 	) {
+		//! required to #connection in first
+		this.#connection = connection
 		this.#mode = mode
 		this.#type = type
 		this.bitness = bitness
-		this.#connection = connection
 	}
 
 	/**
