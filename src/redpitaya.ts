@@ -136,6 +136,11 @@ export class Redpitaya {
 				type: IOType.Digital,
 				connection: this.connection('parameters', IoPin.digital.io7p),
 			}),
+			io0n: new IO({
+				mode: IOMode.RW,
+				type: IOType.Digital,
+				connection: this.connection('parameters', IoPin.digital.io0n),
+			}),
 			io1n: new IO({
 				mode: IOMode.RW,
 				type: IOType.Digital,
@@ -229,6 +234,7 @@ export class Redpitaya {
 	 * ```
 	 */
 	get channel() {
+		console.log('channels')
 		return {
 			adc1: new Channel({
 				mode: IOMode.RO,
@@ -426,5 +432,22 @@ export class Redpitaya {
 		listener: (event: Event) => void | Promise<void>,
 	) {
 		this.#listeners[type].push(listener)
+	}
+
+	/**
+	 * Close the Redpitaya connection and triggers disconnect event..
+	 * @param {string} [cause] - The `cause` parameter is an optional string that describes the reason for
+	 * closing the Redpitaya. If it is provided, it will be used as the detail for the `CustomEvent` that
+	 * is dispatched to the `disconnect` listeners. If it is not provided, a default detail message will
+	 * be used.
+	 */
+	async close(cause?: string) {
+		const detail = cause ??
+			'Redpitaya was closed by calling Redpitaya.close'
+		this.#listeners.disconnect.forEach((listener) =>
+			listener(new CustomEvent('disconnect', { detail }))
+		)
+		await this.#readable.cancel(detail)
+		await this.#writable.abort(detail)
 	}
 }

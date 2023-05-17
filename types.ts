@@ -97,6 +97,7 @@ export const IoPin = {
 		io5p: 'digital_io_5_p',
 		io6p: 'digital_io_6_p',
 		io7p: 'digital_io_7_p',
+		io0n: 'digital_io_0_n',
 		io1n: 'digital_io_1_n',
 		io2n: 'digital_io_2_n',
 		io3n: 'digital_io_3_n',
