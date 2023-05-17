@@ -35,7 +35,7 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 		this.#connection = connection
 		this.#mode = mode
 		this.#type = type
-		this.bitness = bitness
+		this.setBitness(bitness)
 	}
 
 	/**
@@ -135,10 +135,10 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 * @param {Bitness<12n>} bitness - The "bitness" parameter is a value that represents the number of bits used in the ADC/DAC.
 	 * @example
 	 * ```ts
-	 * analogOut1.bitness = 4n
+	 * analogOut1.setBitness(4n)
 	 * ```
 	 */
-	set bitness(bitness: Bitness<12n>) {
+	async setBitness(bitness: Bitness<12n>) {
 		if ((bitness < 1n || bitness > 12n) && this.#type === IOType.Analog) {
 			throw new RangeError(
 				`${bitness} is invalid bitness for Analog IO, allowed range is (0n < bitness < 13n)`,
@@ -149,15 +149,15 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 				`${bitness} is invalid bitness for Digital IO, bitness must be 1n`,
 			)
 		}
+		await this.#connection.setConfig('bitness', { value: Number(bitness) })
 		this.#bitness = bitness
-		this.#connection.setConfig('bitness', { value: Number(bitness) })
 	}
 
 	/**
 	 * Get the bitness of the IO.
 	 * Only for Analog IOs.
 	 */
-	get bitness(): Bitness<12n> {
+	getBitness(): Bitness<12n> {
 		return this.#bitness
 	}
 
@@ -167,22 +167,22 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 * @param {active<12n>} active - The "active" parameter enable or disable the analog IO.
 	 * @example
 	 * ```ts
-	 * analogIn1.active = true
+	 * analogIn1.setActive(true)
 	 * //analog in 1 start to acquire
 	 * await analogIn1.read() //ok
-	 * analogOut1.active = false
+	 * analogOut1.setActive(false)
 	 * //analog in 1 stop to acquire
 	 * await analogIn1.read() //error
 	 * ```
 	 */
-	set active(active: boolean) {
+	async setActive(active: boolean) {
 		if (this.#type === IOType.Digital) {
 			throw new RangeError(
 				'invalid active parameter is invalid for Digital IO',
 			)
 		}
+		await this.#connection.setConfig('active', { value: Boolean(active) })
 		this.#active = active
-		this.#connection.setConfig('active', { value: Boolean(active) })
 	}
 
 	/**
@@ -190,7 +190,7 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 * Only for Analog IOs.
 	 * @return active - The "active" parameter enable or disable the analog IO.
 	 */
-	get active(): boolean {
+	getActive(): boolean {
 		return this.#active
 	}
 }

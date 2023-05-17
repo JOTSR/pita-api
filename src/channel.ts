@@ -23,7 +23,7 @@ import {
  */
 export class Channel<Mode extends IOMode> {
 	#bitness: Bitness<16n> = 16n
-	#frequency: Frequency
+	#frequency: Frequency = Frequency.SMP_125M
 	#trigger: Trigger = Trigger.Disabled
 
 	#mode: IOMode
@@ -41,8 +41,9 @@ export class Channel<Mode extends IOMode> {
 		//! required to #connection in first
 		this.#connection = connection
 		this.#mode = mode
-		this.#frequency = frequency
-		this.bitness = bitness
+		this.setTrigger(this.#trigger)
+		this.setFrequency(frequency)
+		this.setBitness(bitness)
 	}
 
 	/**
@@ -197,24 +198,24 @@ export class Channel<Mode extends IOMode> {
 	 * @param {Bitness<16n>} bitness - The "bitness" parameter is a value that represents the number of bits used in the ADC/DAC.
 	 * @example
 	 * ```ts
-	 * adc1.bitness = 8n
+	 * adc1.setBitness(8n)
 	 * ```
 	 */
-	set bitness(bitness: Bitness<16n>) {
+	async setBitness(bitness: Bitness<16n>) {
 		if (bitness < 1n || bitness > 16n) {
 			throw new RangeError(
 				`${bitness} is invalid bitness for ACD, allowed range is (0n < bitness < 17n)`,
 			)
 		}
+		await this.#connection.setConfig('bitness', { value: Number(bitness) })
 		this.#bitness = bitness
-		this.#connection.setConfig('bitness', { value: Number(bitness) })
 	}
 
 	/**
 	 * Get the bitness of the Channel.
 	 * @returns bitness - The "bitness" parameter is a value that represents the number of bits used in the ADC/DAC.
 	 */
-	get bitness(): Bitness<16n> {
+	getBitness(): Bitness<16n> {
 		return this.#bitness
 	}
 
@@ -223,19 +224,21 @@ export class Channel<Mode extends IOMode> {
 	 * @param {Frequency} frequency - The frequency parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
 	 * @example
 	 * ```ts
-	 * adc1.frequency = Frequency.SMP_125M
+	 * adc1.setFrequency(Frequency.SMP_125M)
 	 * ```
 	 */
-	set frequency(frequency: Frequency) {
+	async setFrequency(frequency: Frequency) {
+		await this.#connection.setConfig('frequency', {
+			value: Number(frequency),
+		})
 		this.#frequency = frequency
-		this.#connection.setConfig('frequency', { value: Number(frequency) })
 	}
 
 	/**
 	 * Get the clock frequency of the Channel.
 	 * @returns frequency - The frequency parameter is a value that represents the number conversions made by the ADC/DAC per seconds.
 	 */
-	get frequency(): Frequency {
+	getFrequency(): Frequency {
 		return this.#frequency
 	}
 
@@ -244,24 +247,24 @@ export class Channel<Mode extends IOMode> {
 	 * @param {Trigger} trigger - The trigger parameter is a value that which event launch processing.
 	 * @example
 	 * ```ts
-	 * adc1.trigger = Trigger.Now
+	 * adc1.setTrigger(Trigger.Now)
 	 * //channel start to acquire
 	 * await adc1.readSlice(125) //ok
-	 * adc1.trigger = Trigger.Disabled
+	 * adc1.setTrigger(Trigger.Disabled)
 	 * //channel stop to acquire
 	 * await adc1.readSlice(125) //error
 	 * ```
 	 */
-	set trigger(trigger: Trigger) {
+	async setTrigger(trigger: Trigger) {
+		await this.#connection.setConfig('trigger', { value: Number(trigger) })
 		this.#trigger = trigger
-		this.#connection.setConfig('trigger', { value: Number(trigger) })
 	}
 
 	/**
 	 * Get the trigger of the Channel.
 	 * @returns trigger - The trigger parameter is a value that which event launch processing.
 	 */
-	get trigger(): Trigger {
+	getTrigger(): Trigger {
 		return this.#trigger
 	}
 }
