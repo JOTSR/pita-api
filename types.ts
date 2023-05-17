@@ -3,9 +3,11 @@ export type MessageData<
 > = T extends 'signals' ? Signals
 	: T extends 'parameters' ? Parameters
 	: Signals | Parameters
-export type Signals = { signals: Record<MessageId, SignalDatas> }
+export type Signals = { signals: Partial<Record<MessageId, SignalDatas>> }
 export type SignalDatas = { size: number; value: number[] }
-export type Parameters = { parameters: Record<MessageId, ParameterDatas> }
+export type Parameters = {
+	parameters: Partial<Record<MessageId, ParameterDatas>>
+}
 export type ParameterDatas = { value: number | boolean }
 
 export type Tuple<TItem, TLength extends number> = [TItem, ...TItem[]] & {
