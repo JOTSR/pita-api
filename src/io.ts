@@ -57,7 +57,7 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 			)
 		}
 		//@ts-ignore TODO implement better type checking
-		return this.#connection.write(value)
+		return this.#connection.write({ value })
 	}
 
 	/**
