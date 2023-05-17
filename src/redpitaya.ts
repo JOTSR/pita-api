@@ -32,6 +32,15 @@ export class Redpitaya {
 	#readable: ReadableStream<MessageData>
 	#writable: WritableStream<string>
 
+	#listeners: Record<
+		'connect' | 'disconnect' | 'error',
+		((event: Event) => void | Promise<void>)[]
+	> = {
+		connect: [],
+		disconnect: [],
+		error: [],
+	}
+
 	constructor({ connection }: { connection: WebSocketConnection }) {
 		this.#writable = connection.writable
 		this.#readable = connection.readable
@@ -39,6 +48,10 @@ export class Redpitaya {
 			.pipeThrough(new DecompressionStream('gzip'))
 			.pipeThrough(new TextDecoderStream())
 			.pipeThrough(new JsonParseStream()) as ReadableStream<MessageData>
+
+		this.#listeners.connect.forEach((listener) =>
+			listener(new Event('connect'))
+		)
 	}
 
 	#digital() {
@@ -291,6 +304,13 @@ export class Redpitaya {
 	): Promise<T extends 'signals' ? SignalDatas : ParameterDatas> {
 		const { done, value } = await this.#readIter(type, key).next()
 		if (done) {
+			this.#listeners.error.forEach((listener) =>
+				listener(
+					new CustomEvent('error', {
+						detail: `no datas recieved for { ${type}: ${key} }`,
+					}),
+				)
+			)
 			throw new Error(`no datas recieved for { ${type}: ${key} }`)
 		}
 		return value
@@ -303,6 +323,13 @@ export class Redpitaya {
 	): Promise<void> {
 		const { done, value } = await this.#writeIter(type, key).next()
 		if (done) {
+			this.#listeners.error.forEach((listener) =>
+				listener(
+					new CustomEvent('error', {
+						detail: `no datas recieved for { ${type}: ${key} }`,
+					}),
+				)
+			)
 			throw new Error(`no datas recieved for { ${type}: ${key} }`)
 		}
 		return value(datas)
@@ -316,45 +343,88 @@ export class Redpitaya {
 		void,
 		unknown
 	> {
-		const [readable] = this.#readable.tee()
-		const filtered = readable.pipeThrough(
-			new TransformStream<MessageData, MessageData<T>>({
-				transform(chunk, controler) {
-					if (
-						type in chunk && key in chunk[type as keyof MessageData]
-					) {
-						controler.enqueue(chunk as MessageData<T>)
-					}
-				},
-			}),
-		).getReader()
+		try {
+			const [readable] = this.#readable.tee()
+			const filtered = readable.pipeThrough(
+				new TransformStream<MessageData, MessageData<T>>({
+					transform(chunk, controler) {
+						if (
+							type in chunk &&
+							key in chunk[type as keyof MessageData]
+						) {
+							controler.enqueue(chunk as MessageData<T>)
+						}
+					},
+				}),
+			).getReader()
 
-		while (true) {
-			const { done, value } = await filtered.read()
-			if (done) break
-			if ('signals' in value) {
-				yield value.signals[key] as T extends 'signals' ? SignalDatas
-					: ParameterDatas
+			while (true) {
+				const { done, value } = await filtered.read()
+				if (done) break
+				if ('signals' in value) {
+					yield value.signals[key] as T extends 'signals'
+						? SignalDatas
+						: ParameterDatas
+				}
+				if ('parameters' in value) {
+					yield value.parameters[key] as T extends 'signals'
+						? SignalDatas
+						: ParameterDatas
+				}
 			}
-			if ('parameters' in value) {
-				yield value.parameters[key] as T extends 'signals' ? SignalDatas
-					: ParameterDatas
-			}
+		} catch (error) {
+			this.#listeners.disconnect.forEach((listener) =>
+				listener(new CustomEvent('disconnect', { detail: error }))
+			)
 		}
 	}
 
 	async *#writeIter<T extends 'signals' | 'parameters'>(
 		type: T,
 		key: MessageId,
-	): AsyncGenerator<typeof writer, void, void> {
-		const writer = (
+	): AsyncGenerator<
+		(
 			data: T extends 'signals' ? SignalDatas : ParameterDatas,
-		) => this.#writable.getWriter().write(
-			JSON.stringify({ [type]: { [key]: data } }),
-		)
+		) => Promise<void>,
+		void,
+		void
+	> {
+		try {
+			const writer = (
+				data: T extends 'signals' ? SignalDatas : ParameterDatas,
+			) => this.#writable.getWriter().write(
+				JSON.stringify({ [type]: { [key]: data } }),
+			)
 
-		while (true) {
-			yield writer
+			while (true) {
+				yield writer
+			}
+		} catch (error) {
+			this.#listeners.disconnect.forEach((listener) =>
+				listener(new CustomEvent('disconnect', { detail: error }))
+			)
 		}
+	}
+
+	/**
+	 * Adds an event listener for connect, disconnect, or error events.
+	 * @param {'connect' | 'disconnect' | 'error'} type - Type of event to listen for.
+	 * @param listener - The listener parameter is a function that will be called when the specified event
+	 * type occurs. It takes an event object as its parameter and can return either void or a Promise that
+	 * resolves to void. The event object contains information about the event that occurred, such as the
+	 * type of event and any additional data associated
+	 * @example
+	 * ```ts
+	 * redpitaya.addEventListener('connect', () => alert('redpitaya is connected'))
+	 * redpitaya.addEventListener('disconnect', () => alert('please check your connection'))
+	 * redpitaya.addEventListener('error', () => alert('operation fails'))
+	 * //...
+	 * ```
+	 */
+	addEventListener(
+		type: 'connect' | 'disconnect' | 'error',
+		listener: (event: Event) => void | Promise<void>,
+	) {
+		this.#listeners[type].push(listener)
 	}
 }
