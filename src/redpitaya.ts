@@ -30,7 +30,7 @@ import { JsonParseStream } from '../deps.ts'
  */
 export class Redpitaya {
 	#readable: ReadableStream<MessageData>
-	#writable: WritableStream<string>
+	#writer: WritableStreamDefaultWriter<string>
 
 	#listeners: Record<
 		'connect' | 'disconnect' | 'error',
@@ -42,7 +42,7 @@ export class Redpitaya {
 	}
 
 	constructor({ connection }: { connection: WebSocketConnection }) {
-		this.#writable = connection.writable
+		this.#writer = connection.writable.getWriter()
 		this.#readable = connection.readable
 			//@ts-ignore TODO fix definition
 			.pipeThrough(new DecompressionStream('gzip'))
@@ -234,7 +234,6 @@ export class Redpitaya {
 	 * ```
 	 */
 	get channel() {
-		console.log('channels')
 		return {
 			adc1: new Channel({
 				mode: IOMode.RO,
@@ -398,7 +397,7 @@ export class Redpitaya {
 		try {
 			const writer = (
 				data: T extends 'signals' ? SignalDatas : ParameterDatas,
-			) => this.#writable.getWriter().write(
+			) => this.#writer.write(
 				JSON.stringify({ [type]: { [key]: data } }),
 			)
 
@@ -448,6 +447,6 @@ export class Redpitaya {
 			listener(new CustomEvent('disconnect', { detail }))
 		)
 		await this.#readable.cancel(detail)
-		await this.#writable.abort(detail)
+		await this.#writer.abort(detail)
 	}
 }
