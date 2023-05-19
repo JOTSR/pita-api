@@ -41,6 +41,8 @@ export class Redpitaya {
 		error: [],
 	}
 
+	#closed = false
+
 	constructor({ connection }: { connection: WebSocketConnection }) {
 		this.#writer = connection.writable.getWriter()
 		this.#readable = connection.readable
@@ -448,5 +450,21 @@ export class Redpitaya {
 		)
 		await this.#readable.cancel(detail)
 		await this.#writer.abort(detail)
+		this.#closed = true
+	}
+
+	/**
+	 * True if Redpitaya.close() called.
+	 * @example
+	 * ```ts
+	 * redpitaya.pin.digital.led0.write(true) //ok
+	 * redpitaya.closed //false
+	 * await redpitaya.close()
+	 * redpitaya.pin.digital.led0.write(true) //error
+	 * redpitaya.closed //true
+	 * ```
+	 */
+	get closed() {
+		return this.#closed
 	}
 }
