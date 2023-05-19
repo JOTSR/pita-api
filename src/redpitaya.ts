@@ -446,10 +446,10 @@ export class Redpitaya {
 	 * @example
 	 * ```ts
 	 * redpitaya.addEventListener('disconnect', handleDisconnect)
-	 * redpitaya.pin.digital.led0.write(true) //ok
+	 * await redpitaya.pin.digital.led0.write(true) //ok
 	 * await redpitaya.close()
 	 * //handleDisconnect is called
-	 * redpitaya.pin.digital.led0.write(true) //error
+	 * await redpitaya.pin.digital.led0.write(true) //error
 	 * ```
 	 */
 	async close(cause?: string) {
@@ -467,10 +467,10 @@ export class Redpitaya {
 	 * True if Redpitaya.close() called.
 	 * @example
 	 * ```ts
-	 * redpitaya.pin.digital.led0.write(true) //ok
+	 * await redpitaya.pin.digital.led0.write(true) //ok
 	 * redpitaya.closed //false
 	 * await redpitaya.close()
-	 * redpitaya.pin.digital.led0.write(true) //error
+	 * await redpitaya.pin.digital.led0.write(true) //error
 	 * redpitaya.closed //true
 	 * ```
 	 */
