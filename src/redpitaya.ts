@@ -436,11 +436,21 @@ export class Redpitaya {
 	}
 
 	/**
-	 * Close the Redpitaya connection and triggers disconnect event..
+	 * Close the Redpitaya connection and triggers disconnect event.
 	 * @param {string} [cause] - The `cause` parameter is an optional string that describes the reason for
 	 * closing the Redpitaya. If it is provided, it will be used as the detail for the `CustomEvent` that
 	 * is dispatched to the `disconnect` listeners. If it is not provided, a default detail message will
 	 * be used.
+	 *
+	 * close() abort all pending messages, no finished state is lost.
+	 * @example
+	 * ```ts
+	 * redpitaya.addEventListener('disconnect', handleDisconnect)
+	 * redpitaya.pin.digital.led0.write(true) //ok
+	 * await redpitaya.close()
+	 * //handleDisconnect is called
+	 * redpitaya.pin.digital.led0.write(true) //error
+	 * ```
 	 */
 	async close(cause?: string) {
 		const detail = cause ??
