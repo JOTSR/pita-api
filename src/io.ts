@@ -51,7 +51,7 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 			: Type extends IOType.Digital ? boolean
 			: number,
 	): Promise<void> {
-		if (!this.#active && this.#type === IOType.Analog) {
+		if (!this.getActive() && this.#type === IOType.Analog) {
 			throw new Error(
 				'analog IO "active" parameter is set to "false", no data can be processed',
 			)
@@ -76,7 +76,7 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 		if (this.#mode === IOMode.WO) {
 			throw new TypeError(`can't read write only pin`)
 		}
-		if (!this.#active && this.#type === IOType.Analog) {
+		if (!this.getActive() && this.#type === IOType.Analog) {
 			throw new Error(
 				'analog IO "active" parameter is set to "false", no data can be processed',
 			)
@@ -103,7 +103,7 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 * ```
 	 */
 	readIter() {
-		if (!this.#active && this.#type === IOType.Analog) {
+		if (!this.getActive() && this.#type === IOType.Analog) {
 			throw new Error(
 				'analog IO "active" parameter is set to "false", no data can be processed',
 			)
@@ -121,7 +121,7 @@ export class IO<Mode extends IOMode, Type extends IOType> {
 	 * ```
 	 */
 	writeIter() {
-		if (!this.#active && this.#type === IOType.Analog) {
+		if (!this.getActive() && this.#type === IOType.Analog) {
 			throw new Error(
 				'analog IO "active" parameter is set to "false", no data can be processed',
 			)
