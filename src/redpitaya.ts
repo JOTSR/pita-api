@@ -57,175 +57,171 @@ export class Redpitaya {
 		)
 	}
 
-	#digital() {
-		return {
-			led0: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.led0),
-			}),
-			led1: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.led1),
-			}),
-			led2: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.led2),
-			}),
-			led3: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.led3),
-			}),
-			led4: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.led4),
-			}),
-			led5: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.led5),
-			}),
-			led6: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.led6),
-			}),
-			led7: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.led7),
-			}),
-			io0p: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io0p),
-			}),
-			io1p: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io1p),
-			}),
-			io2p: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io2p),
-			}),
-			io3p: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io3p),
-			}),
-			io4p: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io4p),
-			}),
-			io5p: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io5p),
-			}),
-			io6p: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io6p),
-			}),
-			io7p: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io7p),
-			}),
-			io0n: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io0n),
-			}),
-			io1n: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io1n),
-			}),
-			io2n: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io2n),
-			}),
-			io3n: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io3n),
-			}),
-			io4n: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io4n),
-			}),
-			io5n: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io5n),
-			}),
-			io6n: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io6n),
-			}),
-			io7n: new IO({
-				mode: IOMode.RW,
-				type: IOType.Digital,
-				connection: this.connection('parameters', IoPin.digital.io7n),
-			}),
-		} as const
-	}
+	#digital = {
+		led0: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.led0),
+		}),
+		led1: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.led1),
+		}),
+		led2: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.led2),
+		}),
+		led3: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.led3),
+		}),
+		led4: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.led4),
+		}),
+		led5: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.led5),
+		}),
+		led6: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.led6),
+		}),
+		led7: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.led7),
+		}),
+		io0p: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io0p),
+		}),
+		io1p: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io1p),
+		}),
+		io2p: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io2p),
+		}),
+		io3p: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io3p),
+		}),
+		io4p: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io4p),
+		}),
+		io5p: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io5p),
+		}),
+		io6p: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io6p),
+		}),
+		io7p: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io7p),
+		}),
+		io0n: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io0n),
+		}),
+		io1n: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io1n),
+		}),
+		io2n: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io2n),
+		}),
+		io3n: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io3n),
+		}),
+		io4n: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io4n),
+		}),
+		io5n: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io5n),
+		}),
+		io6n: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io6n),
+		}),
+		io7n: new IO({
+			mode: IOMode.RW,
+			type: IOType.Digital,
+			connection: this.connection('parameters', IoPin.digital.io7n),
+		}),
+	} as const
 
-	#analog() {
-		return {
-			out0: new IO({
-				mode: IOMode.WO,
-				type: IOType.Analog,
-				connection: this.connection('signals', IoPin.analog.out0),
-			}),
-			out1: new IO({
-				mode: IOMode.WO,
-				type: IOType.Analog,
-				connection: this.connection('signals', IoPin.analog.out1),
-			}),
-			out2: new IO({
-				mode: IOMode.WO,
-				type: IOType.Analog,
-				connection: this.connection('signals', IoPin.analog.out2),
-			}),
-			out3: new IO({
-				mode: IOMode.WO,
-				type: IOType.Analog,
-				connection: this.connection('signals', IoPin.analog.out3),
-			}),
-			in0: new IO({
-				mode: IOMode.RO,
-				type: IOType.Analog,
-				connection: this.connection('signals', IoPin.analog.in0),
-			}),
-			in1: new IO({
-				mode: IOMode.RO,
-				type: IOType.Analog,
-				connection: this.connection('signals', IoPin.analog.in1),
-			}),
-			in2: new IO({
-				mode: IOMode.RO,
-				type: IOType.Analog,
-				connection: this.connection('signals', IoPin.analog.in2),
-			}),
-			in3: new IO({
-				mode: IOMode.RO,
-				type: IOType.Analog,
-				connection: this.connection('signals', IoPin.analog.in3),
-			}),
-		} as const
-	}
+	#analog = {
+		out0: new IO({
+			mode: IOMode.WO,
+			type: IOType.Analog,
+			connection: this.connection('signals', IoPin.analog.out0),
+		}),
+		out1: new IO({
+			mode: IOMode.WO,
+			type: IOType.Analog,
+			connection: this.connection('signals', IoPin.analog.out1),
+		}),
+		out2: new IO({
+			mode: IOMode.WO,
+			type: IOType.Analog,
+			connection: this.connection('signals', IoPin.analog.out2),
+		}),
+		out3: new IO({
+			mode: IOMode.WO,
+			type: IOType.Analog,
+			connection: this.connection('signals', IoPin.analog.out3),
+		}),
+		in0: new IO({
+			mode: IOMode.RO,
+			type: IOType.Analog,
+			connection: this.connection('signals', IoPin.analog.in0),
+		}),
+		in1: new IO({
+			mode: IOMode.RO,
+			type: IOType.Analog,
+			connection: this.connection('signals', IoPin.analog.in1),
+		}),
+		in2: new IO({
+			mode: IOMode.RO,
+			type: IOType.Analog,
+			connection: this.connection('signals', IoPin.analog.in2),
+		}),
+		in3: new IO({
+			mode: IOMode.RO,
+			type: IOType.Analog,
+			connection: this.connection('signals', IoPin.analog.in3),
+		}),
+	} as const
 
 	/**
 	 * List of Redpitaya fast analog IOs.
@@ -236,34 +232,32 @@ export class Redpitaya {
 	 * console.log('Gate signal on DAC 1')
 	 * ```
 	 */
-	get channel() {
-		return {
-			adc1: new Channel({
-				mode: IOMode.RO,
-				bitness: 16n,
-				frequency: Frequency.SMP_125M,
-				connection: this.connection('signals', ChannelPin.adc1),
-			}),
-			adc2: new Channel({
-				mode: IOMode.RO,
-				bitness: 16n,
-				frequency: Frequency.SMP_125M,
-				connection: this.connection('signals', ChannelPin.adc2),
-			}),
-			dac1: new Channel({
-				mode: IOMode.WO,
-				bitness: 16n,
-				frequency: Frequency.SMP_125M,
-				connection: this.connection('signals', ChannelPin.dac1),
-			}),
-			dac2: new Channel({
-				mode: IOMode.WO,
-				bitness: 16n,
-				frequency: Frequency.SMP_125M,
-				connection: this.connection('signals', ChannelPin.dac2),
-			}),
-		} as const
-	}
+	channel = {
+		adc1: new Channel({
+			mode: IOMode.RO,
+			bitness: 16n,
+			frequency: Frequency.SMP_125M,
+			connection: this.connection('signals', ChannelPin.adc1),
+		}),
+		adc2: new Channel({
+			mode: IOMode.RO,
+			bitness: 16n,
+			frequency: Frequency.SMP_125M,
+			connection: this.connection('signals', ChannelPin.adc2),
+		}),
+		dac1: new Channel({
+			mode: IOMode.WO,
+			bitness: 16n,
+			frequency: Frequency.SMP_125M,
+			connection: this.connection('signals', ChannelPin.dac1),
+		}),
+		dac2: new Channel({
+			mode: IOMode.WO,
+			bitness: 16n,
+			frequency: Frequency.SMP_125M,
+			connection: this.connection('signals', ChannelPin.dac2),
+		}),
+	} as const
 
 	/**
 	 * List of Redpitaya digital and slow analog IOs.
@@ -274,11 +268,10 @@ export class Redpitaya {
 	 * console.log('Led 1 is ON')
 	 * ```
 	 */
-	get pin() {
-		return {
-			analog: this.#analog(),
-			digital: this.#digital(),
-		}
+	pin = {
+		analog: this.#analog,
+		digital: this.#digital,
+	}
 
 	/**
 	 * Exchange messages with Redpitaya. Send and recieve signals and parameters from Redpitaya backend.
