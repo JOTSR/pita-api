@@ -42,6 +42,7 @@ export class Redpitaya {
 	}
 
 	#closed = false
+	#closeCause?: string
 
 	constructor({ connection }: { connection: WebSocketConnection }) {
 		this.#writer = connection.writable.getWriter()
@@ -278,7 +279,6 @@ export class Redpitaya {
 			analog: this.#analog(),
 			digital: this.#digital(),
 		}
-	}
 
 	/**
 	 * Exchange messages with Redpitaya. Send and recieve signals and parameters from Redpitaya backend.
@@ -350,6 +350,16 @@ export class Redpitaya {
 		void,
 		unknown
 	> {
+		if (this.#closed) {
+			throw new Error(
+				'Redpitaya connection was already closed by calling Redpitaya.close',
+				{
+					cause: new Error(
+						this.#closeCause ?? 'no close detail provided',
+					),
+				},
+			)
+		}
 		try {
 			const [readable] = this.#readable.tee()
 			const filtered = readable.pipeThrough(
@@ -396,6 +406,16 @@ export class Redpitaya {
 		void,
 		void
 	> {
+		if (this.#closed) {
+			throw new Error(
+				'Redpitaya connection was already closed by calling Redpitaya.close',
+				{
+					cause: new Error(
+						this.#closeCause ?? 'no close detail provided',
+					),
+				},
+			)
+		}
 		try {
 			const writer = (
 				data: T extends 'signals' ? SignalDatas : ParameterDatas,
@@ -458,8 +478,11 @@ export class Redpitaya {
 		this.#listeners.disconnect.forEach((listener) =>
 			listener(new CustomEvent('disconnect', { detail }))
 		)
+		this.#closeCause = detail
 		await this.#readable.cancel(detail)
-		await this.#writer.abort(detail)
+		if (!this.#writer.closed) {
+			await this.#writer.abort(detail)
+		}
 		this.#closed = true
 	}
 
