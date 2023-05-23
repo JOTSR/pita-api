@@ -17,6 +17,12 @@ about backend, and with [Pita cli](https://deno.land/x/pita), build and
 implement your webapp with a robust and secure environement. It handle all your
 workflow, from tooling installation to testing, benching and publishing.
 
+Pita project resides in:
+|[pita cli](https://deno.land/x/pita)|[pita api](https://deno.land/x/pita_api)|[pita template](https://github.com/JOTSR/pita-template)|
+|:------:|:-----:|:-----:|
+|[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/JOTSR/pita-cli?style=flat-square)](https://github.com/JOTSR/pita-cli)|[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/JOTSR/pita-api?style=flat-square)](https://github.com/JOTSR/pita-api)|[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/JOTSR/pita-template?style=flat-square)](https://github.com/JOTSR/pita-template)|
+||[![deno doc](https://img.shields.io/static/v1?logo=deno&label=deno&message=doc&color=blue&style=flat-square)](https://deno.land/x/pita_api/mod.ts)||
+
 ## Getting started
 
 Example app taken from [pita template](https://github.com/JOTSR/pita-template).
