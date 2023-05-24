@@ -1,7 +1,11 @@
 // Import the Redpitaya class and the necessary types
 import { Redpitaya } from './redpitaya.ts'
 import { MessageData } from '../types.ts'
-import { assert, assertEquals, assertRejects } from '@std/testing/asserts.ts'
+import {
+	assert,
+	assertEquals,
+	assertRejects,
+} from 'https://deno.land/std@0.187.0/testing/asserts.ts'
 import { gzipEncode } from 'https://deno.land/x/wasm_gzip@v1.0.0/mod.ts'
 
 // Define a mock message data chunk
