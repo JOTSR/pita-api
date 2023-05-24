@@ -16,6 +16,5 @@
 		],
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact"
-	},
-	"importMap": "./import_map.json"
+	}
 }
