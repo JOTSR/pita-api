@@ -34,10 +34,15 @@ export class Project {
 			)
 		}
 
-		const connection = await new WebSocketStream(this.#config.wsEndpoint)
-			.connection
+		if (this.#config.wsEndpoint.startsWith('ws://')) {
+			return new Redpitaya({
+				endpoint: this.#config.wsEndpoint as `ws://${string}`,
+			})
+		}
 
-		return new Redpitaya({ connection })
+		throw new TypeError(
+			`invalid websocket endpoint not starting with ws:// (${this.#config.wsEndpoint})`,
+		)
 	}
 
 	/**

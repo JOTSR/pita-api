@@ -29,8 +29,7 @@ import { JsonParseStream } from '../deps.ts'
  * ```
  */
 export class Redpitaya {
-	#readable: ReadableStream<MessageData>
-	#writer: WritableStreamDefaultWriter<string>
+	#endpoint: `ws://${string}`
 
 	#listeners: Record<
 		'connect' | 'disconnect' | 'error',
@@ -44,14 +43,8 @@ export class Redpitaya {
 	#closed = false
 	#closeCause?: string
 
-	constructor({ connection }: { connection: WebSocketConnection }) {
-		this.#writer = connection.writable.getWriter()
-		this.#readable = connection.readable
-			//@ts-ignore TODO fix definition
-			.pipeThrough(new DecompressionStream('gzip'))
-			.pipeThrough(new TextDecoderStream())
-			.pipeThrough(new JsonParseStream()) as ReadableStream<MessageData>
-
+	constructor({ endpoint }: { endpoint: `ws://${string}` }) {
+		this.#endpoint = endpoint
 		this.#listeners.connect.forEach((listener) =>
 			listener(new Event('connect'))
 		)
@@ -354,19 +347,25 @@ export class Redpitaya {
 			)
 		}
 		try {
-			const [readable] = this.#readable.tee()
-			const filtered = readable.pipeThrough(
-				new TransformStream<MessageData, MessageData<T>>({
-					transform(chunk, controler) {
-						if (
-							type in chunk &&
-							key in chunk[type as keyof MessageData]
-						) {
-							controler.enqueue(chunk as MessageData<T>)
-						}
-					},
-				}),
-			).getReader()
+			const { readable } = await new WebSocketStream(this.#endpoint)
+				.connection
+			const filtered = readable
+				//@ts-ignore TODO fix definition
+				.pipeThrough(new DecompressionStream('gzip'))
+				.pipeThrough(new TextDecoderStream())
+				.pipeThrough(new JsonParseStream())
+				.pipeThrough(
+					new TransformStream<MessageData, MessageData<T>>({
+						transform(chunk, controler) {
+							if (
+								type in chunk &&
+								key in chunk[type as keyof MessageData]
+							) {
+								controler.enqueue(chunk as MessageData<T>)
+							}
+						},
+					}),
+				).getReader()
 
 			while (true) {
 				const { done, value } = await filtered.read()
@@ -409,12 +408,19 @@ export class Redpitaya {
 				},
 			)
 		}
+
 		try {
+			const { writable } = await new WebSocketStream(this.#endpoint)
+				.connection
+			const _writer = writable.getWriter()
+
 			const writer = (
 				data: T extends 'signals' ? SignalDatas : ParameterDatas,
-			) => this.#writer.write(
+			) => _writer.write(
 				JSON.stringify({ [type]: { [key]: data } }),
 			)
+
+			await _writer.ready
 
 			while (true) {
 				yield writer
@@ -465,17 +471,13 @@ export class Redpitaya {
 	 * await redpitaya.pin.digital.led0.write(true) //error
 	 * ```
 	 */
-	async close(cause?: string) {
+	close(cause?: string) {
 		const detail = cause ??
 			'Redpitaya was closed by calling Redpitaya.close'
 		this.#listeners.disconnect.forEach((listener) =>
 			listener(new CustomEvent('disconnect', { detail }))
 		)
 		this.#closeCause = detail
-		await this.#readable.cancel(detail)
-		if (!this.#writer.closed) {
-			await this.#writer.abort(detail)
-		}
 		this.#closed = true
 	}
 
