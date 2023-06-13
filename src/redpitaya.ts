@@ -45,8 +45,10 @@ export class Redpitaya {
 
 	constructor({ endpoint }: { endpoint: `ws://${string}` }) {
 		this.#endpoint = endpoint
-		this.#listeners.connect.forEach((listener) =>
-			listener(new Event('connect'))
+		Promise.resolve().then(() =>
+			this.#listeners.connect.forEach((listener) =>
+				listener(new Event('connect'))
+			)
 		)
 	}
 
