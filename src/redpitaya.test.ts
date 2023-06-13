@@ -54,13 +54,22 @@ const writable = () =>
 		},
 	})
 
-// Define a mock connection object
-const getConnection: () => WebSocketConnection = () => ({
-	readable: readable(),
-	writable: writable(),
-	extensions: '',
-	protocol: '',
-})
+// Define a mock websocket stream
+class WebSocketStream {
+	constructor(_endpoint: string) {
+		return {
+			connection: {
+				readable: readable(),
+				writable: writable(),
+				extensions: '',
+				protocol: '',
+			},
+		}
+	}
+}
+
+//@ts-ignore global mock
+globalThis.WebSocketStream = WebSocketStream
 
 //release ressources opened in Deno.test scope before module end
 function closeResources() {
@@ -75,37 +84,37 @@ function closeResources() {
 	}
 }
 
+const endpoint = 'ws://mock'
+
 // Define tests for the Redpitaya class
 Deno.test('redpitaya should be instantiated with a valid connection', () => {
-	// const connection = getConnection()
-	// const redpitaya = new Redpitaya({ connection })
-	// assert(redpitaya)
-	// closeResources()
+	const redpitaya = new Redpitaya({ endpoint })
+	assert(redpitaya)
+	closeResources()
 })
 
 Deno.test('should be able to write a message to the connection', async () => {
-	// const connection = getConnection()
-	// const redpitaya = new Redpitaya({ connection })
-	// assertEquals(messageData.parameters.digital_led_0.value, false)
-	// await redpitaya.pin.digital.led0.write(true)
-	// assertEquals(messageData.parameters.digital_led_0.value, true)
-	// closeResources()
+	const redpitaya = new Redpitaya({ endpoint })
+	assertEquals(messageData.parameters.digital_led_0.value, false)
+	await redpitaya.pin.digital.led0.write(true)
+	assertEquals(messageData.parameters.digital_led_0.value, true)
+	closeResources()
 })
 
 Deno.test('should be able to read a message from the connection', async () => {
-	// const redpitaya = new Redpitaya({ connection: getConnection() })
-	// await assertRejects(() => redpitaya.pin.analog.in0.read())
-	// await redpitaya.pin.analog.in0.setActive(true)
-	// assertEquals(redpitaya.pin.analog.in0.getActive(), true)
-	// assertEquals(await redpitaya.pin.analog.in0.read(), signalValue)
-	// closeResources()
+	const redpitaya = new Redpitaya({ endpoint })
+	await assertRejects(() => redpitaya.pin.analog.in0.read())
+	await redpitaya.pin.analog.in0.setActive(true)
+	assertEquals(redpitaya.pin.analog.in0.getActive(), true)
+	assertEquals(await redpitaya.pin.analog.in0.read(), signalValue)
+	closeResources()
 })
 
-Deno.test('should abort the connection', async () => {
-	// const redpitaya = new Redpitaya({ connection: getConnection() })
-	// assertEquals(redpitaya.closed, false)
-	// await redpitaya.close()
-	// assertRejects(() => redpitaya.pin.digital.led0.write(true))
-	// assertEquals(redpitaya.closed, true)
-	// closeResources()
+Deno.test('should abort the connection', () => {
+	const redpitaya = new Redpitaya({ endpoint })
+	assertEquals(redpitaya.closed, false)
+	redpitaya.close()
+	assertRejects(() => redpitaya.pin.digital.led0.write(true))
+	assertEquals(redpitaya.closed, true)
+	closeResources()
 })
