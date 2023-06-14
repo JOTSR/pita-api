@@ -28,8 +28,7 @@ export { Channel } from './src/channel.ts'
 export { IO } from './src/io.ts'
 export { Project } from './src/project.ts'
 export { Redpitaya } from './src/redpitaya.ts'
-export type {
-	Bitness,
+export {
 	ChannelPin,
 	Frequency,
 	IOMode,
@@ -37,3 +36,4 @@ export type {
 	IOType,
 	Trigger,
 } from './types.ts'
+export type { Bitness } from './types.ts'
