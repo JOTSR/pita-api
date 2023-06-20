@@ -1,3 +1,4 @@
+import { sleep } from '../deps.ts'
 import {
 	ChannelPin,
 	ConfigId,
@@ -5,15 +6,14 @@ import {
 	IOMode,
 	IoPin,
 	IOType,
-	MessageData,
 	MessageId,
 	ParameterDatas,
 	RPConnection,
 	SignalDatas,
 } from '../types.ts'
-import { IO } from './io.ts'
+import { gunzip } from '../utils.ts'
 import { Channel } from './channel.ts'
-import { JsonParseStream } from '../deps.ts'
+import { IO } from './io.ts'
 
 type AnalogPin = {
 	readonly out0: IO<IOMode.WO, IOType.Analog>
@@ -66,8 +66,6 @@ type DigitalPin = {
  * ```
  */
 export class Redpitaya {
-	#endpoint: `ws://${string}`
-
 	#listeners: Record<
 		'connect' | 'disconnect' | 'error',
 		((event: Event) => void | Promise<void>)[]
@@ -81,6 +79,9 @@ export class Redpitaya {
 	#closeCause?: string
 	#digital: DigitalPin
 	#analog: AnalogPin
+	#ws: WebSocket
+	#reader: ReadableStreamDefaultReader
+	#writer: WritableStreamDefaultWriter
 	channel: {
 		readonly adc1: Channel<IOMode.RO>
 		readonly adc2: Channel<IOMode.RO>
@@ -90,12 +91,45 @@ export class Redpitaya {
 	pin: { analog: AnalogPin; digital: DigitalPin }
 
 	constructor({ endpoint }: { endpoint: `ws://${string}` }) {
-		this.#endpoint = endpoint
-		Promise.resolve().then(() =>
+		const ws = new WebSocket(endpoint)
+		ws.binaryType = 'blob'
+		this.#ws = ws
+
+		const connected = this.connected
+		const writable = new WritableStream({
+			async write(chunk) {
+				await connected()
+				ws.send(chunk)
+			},
+		})
+		this.#writer = writable.getWriter()
+
+		ws.onopen = () =>
 			this.#listeners.connect.forEach((listener) =>
 				listener(new Event('connect'))
 			)
-		)
+		const readable = new ReadableStream({
+			start(controller) {
+				ws.onmessage = async (message: MessageEvent<Blob>) => {
+					const buffer = await message.data.arrayBuffer()
+					const decompressed = await gunzip(buffer)
+					const string = new TextDecoder().decode(decompressed)
+					const datas = JSON.parse(string)
+					controller.enqueue(datas)
+				}
+			},
+		})
+		this.#reader = readable.getReader()
+		ws.onerror = (error) =>
+			this.#listeners.error.forEach((listener) =>
+				listener(
+					new CustomEvent('error', {
+						detail: error,
+					}),
+				)
+			)
+		ws.onclose = (event) => this.close(event.toString())
+
 		this.#digital = {
 			led0: new IO({
 				mode: IOMode.RW,
@@ -394,38 +428,20 @@ export class Redpitaya {
 			)
 		}
 		try {
-			const { readable } = await new WebSocketStream(this.#endpoint)
-				.connection
-			const filtered = readable
-				//@ts-ignore TODO fix definition
-				.pipeThrough(new DecompressionStream('gzip'))
-				.pipeThrough(new TextDecoderStream())
-				.pipeThrough(new JsonParseStream())
-				.pipeThrough(
-					new TransformStream<MessageData, MessageData<T>>({
-						transform(chunk, controler) {
-							if (
-								type in chunk &&
-								key in chunk[type as keyof MessageData]
-							) {
-								controler.enqueue(chunk as MessageData<T>)
-							}
-						},
-					}),
-				).getReader()
-
 			while (true) {
-				const { done, value } = await filtered.read()
+				const { done, value } = await this.#reader.read()
 				if (done) break
-				if ('signals' in value) {
-					yield value.signals[key] as T extends 'signals'
-						? SignalDatas
-						: ParameterDatas
-				}
-				if ('parameters' in value) {
-					yield value.parameters[key] as T extends 'signals'
-						? SignalDatas
-						: ParameterDatas
+				if (type in value && key in value[type]) {
+					if ('signals' in value) {
+						yield value.signals[key] as T extends 'signals'
+							? SignalDatas
+							: ParameterDatas
+					}
+					if ('parameters' in value) {
+						yield value.parameters[key] as T extends 'signals'
+							? SignalDatas
+							: ParameterDatas
+					}
 				}
 			}
 		} catch (error) {
@@ -457,17 +473,13 @@ export class Redpitaya {
 		}
 
 		try {
-			const { writable } = await new WebSocketStream(this.#endpoint)
-				.connection
-			const _writer = writable.getWriter()
-
 			const writer = (
 				data: T extends 'signals' ? SignalDatas : ParameterDatas,
-			) => _writer.write(
+			) => this.#writer.write(
 				JSON.stringify({ [type]: { [key]: data } }),
 			)
 
-			await _writer.ready
+			await this.#writer.ready
 
 			while (true) {
 				yield writer
@@ -518,12 +530,14 @@ export class Redpitaya {
 	 * await redpitaya.pin.digital.led0.write(true) //error
 	 * ```
 	 */
-	close(cause?: string) {
+	async close(cause?: string) {
 		const detail = cause ??
 			'Redpitaya was closed by calling Redpitaya.close'
 		this.#listeners.disconnect.forEach((listener) =>
 			listener(new CustomEvent('disconnect', { detail }))
 		)
+		await this.#writer.abort(cause)
+		await this.#writer.abort(cause)
 		this.#closeCause = detail
 		this.#closed = true
 	}
@@ -541,5 +555,18 @@ export class Redpitaya {
 	 */
 	get closed() {
 		return this.#closed
+	}
+
+	/**
+	 * Check if underlaying websocket is opened
+	 * @example
+	 * ```ts
+	 * await redpitaya.connected()
+	 * ```
+	 */
+	async connected() {
+		while (this.#ws.readyState === this.#ws.CONNECTING) {
+			await sleep(50)
+		}
 	}
 }

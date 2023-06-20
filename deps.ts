@@ -1,4 +1,1 @@
-export {
-	JsonParseStream,
-	JsonStringifyStream,
-} from 'https://deno.land/std@0.187.0/json/mod.ts'
+export { sleep } from 'https://deno.land/x/delayed@2.0.2/mod.ts'
