@@ -95,10 +95,11 @@ export class Redpitaya {
 		ws.binaryType = 'blob'
 		this.#ws = ws
 
-		const connected = this.connected
 		const writable = new WritableStream({
 			async write(chunk) {
-				await connected()
+				while (ws.readyState === ws.CONNECTING) {
+					await sleep(50)
+				}
 				ws.send(chunk)
 			},
 		})
